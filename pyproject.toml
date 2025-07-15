@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qtools"
+version = "0.1.0"
+description = "Personal quant research toolkit: price loaders and performance metrics for US / TW / Crypto"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "scipy>=1.11",
+    "pyarrow>=14.0",
+    "matplotlib>=3.7",
+    "yfinance>=0.2.40",
+    "ccxt>=4.2",
+    "requests>=2.28",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov",
+    "ruff>=0.3",
+    "ipykernel",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qtools"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
