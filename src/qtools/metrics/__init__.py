@@ -1,17 +1,10 @@
-from qtools.metrics.performance import (
-    annualized_return,
-    annualized_vol,
-    calmar,
-    max_drawdown,
-    sharpe,
-    sortino,
-)
+from qtools.metrics.factor import information_coefficient, quantile_returns
+from qtools.metrics.performance import max_drawdown, sharpe, sortino
 
 __all__ = [
     "sharpe",
     "sortino",
     "max_drawdown",
-    "calmar",
-    "annualized_return",
-    "annualized_vol",
+    "information_coefficient",
+    "quantile_returns",
 ]
