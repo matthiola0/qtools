@@ -38,7 +38,10 @@ class CostModel:
         return (buys + sells) * bidir + sells * sell_tax
 
 
-# Approximate round-trip costs (one-way bps; round-trip ≈ 2x on commission+slippage + tax).
-TW_EQUITY = CostModel(commission_bps=14.25, slippage_bps=5, tax_bps=30)
+# Per-leg bps (round-trip ≈ 2×commission + 2×slippage + tax). TW assumes a typical
+# broker-discounted commission (~2 折 of the 0.1425% legal max); tax is the 0.3%
+# securities transaction tax on the sell leg only. CRYPTO matches Binance spot
+# taker (~10 bps single-leg) split into commission + a small slippage component.
+TW_EQUITY = CostModel(commission_bps=3, slippage_bps=5, tax_bps=30)
 US_EQUITY = CostModel(commission_bps=1, slippage_bps=4)
-CRYPTO = CostModel(commission_bps=10, slippage_bps=10)
+CRYPTO = CostModel(commission_bps=5, slippage_bps=5)
