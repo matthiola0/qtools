@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 import ccxt
 import pandas as pd
 
+from qtools.data._util import universe_key
 from qtools.data.cache import read_parquet, write_parquet
 
 _COLS = ["date", "symbol", "open", "high", "low", "close", "volume"]
@@ -21,7 +22,10 @@ def get_crypto_prices(
     interval: str = "1d",
     exchange: str = "binance",
 ) -> pd.DataFrame:
-    cache_key = f"{'_'.join(sorted(symbols)[:5])}_{start}_{end}_{interval}"
+    """Download crypto OHLCV via ccxt. Supports any interval the exchange offers
+    (Binance: 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d, 3d, 1w, 1M).
+    """
+    cache_key = f"{universe_key(symbols)}_{start}_{end}_{interval}_{exchange}"
     cached = read_parquet("crypto_prices", cache_key)
     if cached is not None:
         return cached
@@ -40,7 +44,7 @@ def get_crypto_prices(
             if not chunk:
                 break
             bars.extend(chunk)
-            cursor = chunk[-1][0] + 1
+            cursor = chunk[-1][0] + 1  # next ms after last bar
 
         if not bars:
             continue

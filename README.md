@@ -57,7 +57,37 @@ Signals and weights are wide-format: index = `date`, columns = `symbol`.
 | `qtools.metrics.plots` | `plot_cumulative_returns`, `plot_drawdown`, `plot_quantile_returns`, `plot_ic_timeseries` |
 | `qtools.utils.dates` | `trading_calendar`, `resample_to_last` |
 
-## Example
+## CLI
+
+Installing qtools registers a `qtools` command:
+
+```bash
+# Daily bars (default)
+qtools fetch us AAPL TSLA --start 2024-01-01 --end 2024-12-31
+
+# Intraday — Yahoo limits 1-minute bars to the last 7 days
+qtools fetch tw 2330 --start 2024-01-01 --end 2024-06-30 --interval 1h
+
+# Crypto intraday has no history limit on Binance
+qtools fetch crypto BTC/USDT ETH/USDT --start 2024-04-01 --end 2024-04-02 --interval 1m
+
+# Save to parquet instead of printing
+qtools fetch us AAPL --start 2024-01-01 --end 2024-06-30 -o aapl.parquet
+
+# List default universes
+qtools universe us      # S&P 500 (from Wikipedia)
+qtools universe tw      # 0050 constituents (snapshot)
+qtools universe crypto  # top 30 USDT pairs by 24h volume
+```
+
+Supported intervals: `1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo`
+for US/TW; Binance additionally supports `3m, 2h, 4h, 6h, 8h, 12h, 3d, 1w, 1M`.
+Yahoo restricts intraday history (e.g. 1m → last 7 days, 1h → last 730 days).
+
+Every fetch is cached to `~/.qtools_cache/<market>_prices/<hash>.parquet`; the
+second call with identical arguments reads from disk in milliseconds.
+
+## Python API
 
 ```python
 from qtools.backtest import BacktestEngine, US_EQUITY
@@ -82,3 +112,5 @@ print(f"Sharpe: {sharpe(result.returns):+.2f}")
 ```bash
 pytest -v
 ```
+
+42 unit tests covering data cache, date utilities, portfolio construction, backtest engine, factor metrics, performance statistics, and the CLI.

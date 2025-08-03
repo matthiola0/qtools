@@ -1,15 +1,10 @@
-import hashlib
-
 import pandas as pd
 import yfinance as yf
 
+from qtools.data._util import universe_key
 from qtools.data.cache import read_parquet, write_parquet
 
 _COLS = ["date", "symbol", "open", "high", "low", "close", "volume"]
-
-
-def _universe_key(symbols: list[str]) -> str:
-    return hashlib.md5("_".join(sorted(symbols)).encode()).hexdigest()[:10]
 
 
 def _to_long(raw: pd.DataFrame, fallback_symbol: str) -> pd.DataFrame:
@@ -25,6 +20,7 @@ def _to_long(raw: pd.DataFrame, fallback_symbol: str) -> pd.DataFrame:
         df["symbol"] = fallback_symbol.replace(".TW", "")
 
     df.columns = [c.lower() for c in df.columns]
+    df = df.rename(columns={"datetime": "date"})  # intraday uses "Datetime"
     return df[_COLS]
 
 
@@ -33,9 +29,16 @@ def get_tw_prices(
     start: str,
     end: str,
     adjust: bool = True,
+    interval: str = "1d",
     chunk_size: int = 50,
 ) -> pd.DataFrame:
-    cache_key = f"{_universe_key(symbols)}_{start}_{end}_adj{adjust}"
+    """Download Taiwan equity bars via Yahoo Finance `.TW` tickers.
+
+    See `get_us_prices` for supported intervals and Yahoo history restrictions.
+    """
+    cache_key = f"{universe_key(symbols)}_{start}_{end}_adj{adjust}"
+    if interval != "1d":
+        cache_key += f"_{interval}"
     cached = read_parquet("tw_prices", cache_key)
     if cached is not None:
         return cached
@@ -49,6 +52,7 @@ def get_tw_prices(
             chunk,
             start=start,
             end=end,
+            interval=interval,
             auto_adjust=adjust,
             progress=False,
             threads=True,

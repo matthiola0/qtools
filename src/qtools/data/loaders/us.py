@@ -1,18 +1,14 @@
-import hashlib
 from io import StringIO
 
 import pandas as pd
 import requests
 import yfinance as yf
 
+from qtools.data._util import universe_key
 from qtools.data.cache import read_parquet, write_parquet
 
 _COLS = ["date", "symbol", "open", "high", "low", "close", "volume"]
 _UA = {"User-Agent": "Mozilla/5.0"}
-
-
-def _universe_key(symbols: list[str]) -> str:
-    return hashlib.md5("_".join(sorted(symbols)).encode()).hexdigest()[:10]
 
 
 def _to_long(raw: pd.DataFrame, fallback_symbol: str) -> pd.DataFrame:
@@ -28,6 +24,7 @@ def _to_long(raw: pd.DataFrame, fallback_symbol: str) -> pd.DataFrame:
         df["symbol"] = fallback_symbol
 
     df.columns = [c.lower() for c in df.columns]
+    df = df.rename(columns={"datetime": "date"})  # intraday uses "Datetime"
     return df[_COLS]
 
 
@@ -36,9 +33,18 @@ def get_us_prices(
     start: str,
     end: str,
     adjust: bool = True,
+    interval: str = "1d",
     chunk_size: int = 50,
 ) -> pd.DataFrame:
-    cache_key = f"{_universe_key(symbols)}_{start}_{end}_adj{adjust}"
+    """Download US equity bars from Yahoo Finance.
+
+    interval accepts yfinance aliases: 1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d,
+    5d, 1wk, 1mo, 3mo. Yahoo restricts history for sub-daily bars (e.g., 1m is
+    last 7 days only).
+    """
+    cache_key = f"{universe_key(symbols)}_{start}_{end}_adj{adjust}"
+    if interval != "1d":
+        cache_key += f"_{interval}"
     cached = read_parquet("us_prices", cache_key)
     if cached is not None:
         return cached
@@ -50,6 +56,7 @@ def get_us_prices(
             chunk,
             start=start,
             end=end,
+            interval=interval,
             auto_adjust=adjust,
             progress=False,
             threads=True,
