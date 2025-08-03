@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "qtools"
-version = "0.1.0"
-description = "Personal quant research toolkit: price loaders and performance metrics for US / TW / Crypto"
+version = "0.2.0"
+description = "Personal quant research toolkit: price loaders, backtest engine, and factor / performance metrics for US / TW / Crypto"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
