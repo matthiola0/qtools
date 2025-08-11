@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 import yfinance as yf
 
-from qtools.data._util import universe_key
+from qtools.data._util import require_ohlcv_columns, ticker_level_name, universe_key
 from qtools.data.cache import read_parquet, write_parquet
 
 _COLS = ["date", "symbol", "open", "high", "low", "close", "volume"]
@@ -13,9 +13,10 @@ _UA = {"User-Agent": "Mozilla/5.0"}
 
 def _to_long(raw: pd.DataFrame, fallback_symbol: str) -> pd.DataFrame:
     if isinstance(raw.columns, pd.MultiIndex):
+        level = ticker_level_name(raw.columns, source="get_us_prices")
         frames = []
-        for ticker in raw.columns.get_level_values("Ticker").unique():
-            sub = raw.xs(ticker, level="Ticker", axis=1).copy()
+        for ticker in raw.columns.get_level_values(level).unique():
+            sub = raw.xs(ticker, level=level, axis=1).copy()
             sub["symbol"] = ticker
             frames.append(sub.reset_index())
         df = pd.concat(frames, ignore_index=True)
@@ -25,6 +26,7 @@ def _to_long(raw: pd.DataFrame, fallback_symbol: str) -> pd.DataFrame:
 
     df.columns = [c.lower() for c in df.columns]
     df = df.rename(columns={"datetime": "date"})  # intraday uses "Datetime"
+    require_ohlcv_columns(df, source="get_us_prices")
     return df[_COLS]
 
 
