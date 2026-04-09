@@ -1,5 +1,7 @@
 # qtools
 
+> **Languages**: **English** · [繁體中文](docs/README.zh-TW.md)
+
 Personal quant research toolkit. Data loaders for TW / US / crypto markets, a vectorized backtest engine, and factor / performance metrics.
 
 ## Install
