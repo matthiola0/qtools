@@ -2,7 +2,9 @@
 
 > **Languages**: **English** · [繁體中文](docs/README.zh-TW.md)
 
-Personal quant research toolkit. Data loaders for TW / US / crypto markets, a vectorized backtest engine, and factor / performance metrics.
+I built this before anything else in the portfolio. Every downstream repo — classic-factors, ml-cross-sectional, alt-data-sentiment, ml-return-forecast — uses qtools for data, backtesting, and metrics. Without a shared foundation, the cross-market comparisons would have no consistent basis.
+
+Three things: unified price loaders for TW / US / crypto, a vectorized backtest engine with a realistic cost model, and factor / performance metrics.
 
 ## Install
 
@@ -21,14 +23,9 @@ pytest
 
 ## What it does
 
-- **`qtools.data`** — unified price loaders across three markets. Binance (ccxt)
-  supports any interval from `1m` to `1w`; yfinance provides daily equity data
-  for US and Taiwan. Results are cached as parquet under `~/.qtools_cache/`.
-- **`qtools.backtest`** — vectorized long-only / long-short engine with a
-  cost model (commission + slippage + asymmetric tax on sells). No look-ahead:
-  positions held at close of day t earn day t+1's return.
-- **`qtools.metrics`** — standard performance stats (Sharpe, Sortino, MDD,
-  Calmar) and factor evaluation (IC, IR, quantile spreads, turnover).
+- **`qtools.data`** — unified price loaders across three markets. Binance (ccxt) supports any interval from `1m` to `1w`; yfinance provides daily equity data for US and Taiwan. Results are cached as parquet under `~/.qtools_cache/`.
+- **`qtools.backtest`** — vectorized long-only / long-short engine with a realistic cost model (commission + slippage + asymmetric tax on sells). No look-ahead: positions held at close of day t earn day t+1's return.
+- **`qtools.metrics`** — Sharpe, Sortino, MDD, Calmar, IC, IR, quantile spreads, turnover. Everything downstream repos need.
 - **`qtools.utils.dates`** — trading calendars and rebalance-date selection.
 
 ## Data conventions
